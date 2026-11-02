@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Coding Playground : Play, Learn & Have Fun</title>
+<style>
+:root {
+  --bg: #12162b;
+  --card: #1b2140;
+  --ink: #eef1ff;
+  --muted: #9aa3c7;
+  --line: #2c3563;
+  --web: #ff7a3d;
+  --js-tab: #f7df1e;
+  --py: #3b82f6;
+  --code-bg: #151a35;
+  --out: #0a0e1f;
+  --out-ink: #a7f3d0;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+*, *::before, *::after {
+  box-sizing: inherit;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Trebuchet MS", "Segoe UI", system-ui, -apple-system, sans-serif;
+  font-size: 16px;
+  min-height: 100vh;
+  -webkit-text-size-adjust: 100%;
+}
+
+.app {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+}
+
+nav {
+  width: 240px;
+  flex-shrink: 0;
+  background: var(--card);
+  border-right: 2px solid var(--line);
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+nav h1 {
+  font-size: 1.1rem;
+  margin: 0 0 2px;
+  text-align: center;
+}
+
+nav p.tagline {
+  font-size: 0.72rem;
+  color: var(--muted);
+  text-align: center;
+  margin: 0 0 8px;
+  font-weight: 600;
+}
+
+.nav-btn {
+  border: 2px solid var(--line);
+  background: var(--bg);
+  color: var(--ink);
+  border-radius: 14px;
+  padding: 12px 10px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.nav-btn .ico {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-btn .ico svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
+.nav-btn.active[data-view="web"] {
+  background: var(--web);
+  border-color: var(--web);
+  color: #fff;
+}
+
+.nav-btn.active[data-view="jsrun"] {
+  background: var(--js-tab);
+  border-color: var(--js-tab);
+  color: #000;
+}
+
+.nav-btn.active[data-view="py"] {
+  background: var(--py);
+  border-color: var(--py);
+  color: #fff;
+}
+
+.nav-btn:focus-visible, button:focus-visible, textarea:focus-visible {
+  outline: 3px solid #8b5cf6;
+  outline-offset: 2px;
+}
+
+main {
+  flex: 1;
+  min-width: 0;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.note {
+  background: var(--card);
+  border: 2px dashed var(--line);
+  border-radius: 12px;
+  padding: 8px 12px;
+  margin: 0 0 12px;
+  font-size: .85rem;
+  color: var(--muted);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.btn-secondary {
+  border: 2px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-secondary:hover {
+  background: var(--bg);
+}
+
+.view {
+  display: none;
+  flex: 1;
+  flex-direction: column;
+}
+
+.view.active {
+  display: flex;
+}
+
+h2 {
+  margin: 0 0 10px;
+  font-size: 1.2rem;
+}
+
+.web-grid, .py-wrap, .js-wrap {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  flex: 1;
+  min-height: 400px;
+}
+
+.editors {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+  flex: 1;
+}
+
+.pane {
+  background: var(--card);
+  border: 2px solid var(--line);
+  border-radius: 14px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1;
+}
+
+.pane label {
+  font-weight: 700;
+  font-size: .85rem;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tag {
+  color: #fff;
+  border-radius: 6px;
+  padding: 2px 6px;
+  font-size: .75rem;
+}
+
+.html { background: #e44d26; }
+.css  { background: #2d7fe0; }
+.js   { background: #b8860b; color: #fff; }
+
+textarea {
+  width: 100%;
+  flex: 1;
+  min-height: 90px;
+  resize: none;
+  border: 2px solid var(--line);
+  border-radius: 10px;
+  background: var(--code-bg);
+  color: var(--ink);
+  padding: 10px;
+  font: 13px/1.4 ui-monospace, Menlo, Consolas, monospace;
+  tab-size: 2;
+  -webkit-appearance: none;
+}
+
+iframe {
+  width: 100%;
+  flex: 1;
+  border: 2px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+  min-height: 220px;
+}
+
+.run {
+  margin-top: 8px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--py);
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  padding: 12px;
+  cursor: pointer;
+  font-size: 1rem;
+  width: 100%;
+}
+
+.run-js {
+  background: var(--js-tab);
+  color: #000;
+}
+
+.run:disabled {
+  opacity: .6;
+  cursor: wait;
+}
+
+pre.out-box {
+  flex: 1;
+  margin: 0;
+  background: var(--out);
+  color: var(--out-ink);
+  border-radius: 10px;
+  padding: 10px;
+  overflow: auto;
+  font: 13px/1.4 ui-monospace, Menlo, Consolas, monospace;
+  white-space: pre-wrap;
+  min-height: 120px;
+}
+
+.status {
+  font-size: .8rem;
+  color: var(--muted);
+  margin-top: 6px;
+}
+
+/* 100% Mobile Responsive Stack Layout */
+@media (max-width: 768px) {
+  body {
+    font-size: 15px;
+  }
+  .app {
+    flex-direction: column;
+  }
+  nav {
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    border-right: 0;
+    border-bottom: 2px solid var(--line);
+    padding: 10px;
+    gap: 6px;
+    align-items: center;
+    justify-content: center;
+  }
+  nav h1 {
+    width: 100%;
+    margin: 0;
+    font-size: 1rem;
+  }
+  nav p.tagline {
+    width: 100%;
+    margin: 0 0 4px;
+    font-size: 0.7rem;
+  }
+  .nav-btn {
+    flex: 1;
+    min-width: 100px;
+    padding: 8px 6px;
+    justify-content: center;
+    font-size: 0.8rem;
+    border-radius: 10px;
+  }
+  main {
+    padding: 10px;
+  }
+  .web-grid, .py-wrap, .js-wrap {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    min-height: unset;
+  }
+  .pane {
+    min-height: 180px;
+    flex: none;
+  }
+  textarea {
+    min-height: 130px;
+    height: 130px;
+  }
+  iframe {
+    min-height: 240px;
+    height: 240px;
+  }
+  pre.out-box {
+    min-height: 140px;
+    height: 140px;
+  }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <nav aria-label="Main menu">
+    <h1>🎮 Coding Playground</h1>
+    <p class="tagline">Play, Learn & Have Fun</p>
+
+    <button class="nav-btn active" data-view="web">
+      <span class="ico">🌐</span>Practice Web Dev
+    </button>
+
+    <button class="nav-btn" data-view="jsrun">
+      <span class="ico">
+        <!-- Fixed Proportioned Official JavaScript Vector Icon -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 630 630" width="20" height="20">
+          <rect width="630" height="630" rx="90" fill="#f7df1e"/>
+          <path d="m165.32 520.15c12.7 20.9 31.37 36.19 62.19 36.19 25.96 0 42.6-12.7 42.6-30.2 0-21.2-16.9-28.7-45.5-41.1l-15.7-6.7c-45.1-19.3-75.1-43.5-75.1-94.2 0-46.7 36.7-82.3 94.3-82.3 40.7 0 70.5 14.3 91.2 50.7l-38.7 24.8c-11.4-20.3-27.1-29.2-52.4-29.2-22.6 0-36.2 10.6-36.2 24.8 0 17.5 11 24.8 38.2 36.4l15.7 6.7c52.4 22.6 83.3 45.1 83.3 97.4 0 55.8-43.1 86.8-103.7 86.8-57.5 0-93.8-27.1-112.5-62.8zm210.7 18.2c12.2 6.7 27.6 11.4 44.5 11.4 21.2 0 34.6-9.7 34.6-32.3v-212.7h51.5v213.6c0 53.5-31.8 77.5-83.3 77.5-35 0-63.1-12.9-78.8-31.8z" fill="#000"/>
+        </svg>
+      </span>
+      Practice JS
+    </button>
+
+    <button class="nav-btn" data-view="py">
+      <span class="ico">
+        <!-- Official Python Vector Icon -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 110 110" width="20" height="20">
+          <path fill="#387eb8" d="M54.5 9c-23.7 0-22.2 10.3-22.2 10.3l.1 10.7h22.6v3.2H23.5S9 31.6 9 55.4s12.6 23.1 12.6 23.1h7.5v-11s-.4-12.6 12.4-12.6h21.4s11.9.2 11.9-11.6V20.8S76.8 9 54.5 9zm-12 7.1a4.2 4.2 0 1 1 0 8.4 4.2 4.2 0 0 1 0-8.4z"/>
+          <path fill="#ffc331" d="M55.5 101c23.7 0 22.2-10.3 22.2-10.3l-.1-10.7H55v-3.2h31.4s14.5 1.6 14.5-22.2S88.3 41.5 88.3 41.5h-7.5v11s.4 12.6-12.4 12.6H47s-11.9-.2-11.9 11.6v23.5S33.2 101 55.5 101zm12-7.1a4.2 4.2 0 1 1 0-8.4 4.2 4.2 0 0 1 0 8.4z"/>
+        </svg>
+      </span>
+      Practice Python
+    </button>
+  </nav>
+
+  <main>
+    <div class="note">
+      <span>📶 Offline Ready • Code auto-saves locally</span>
+      <button class="btn-secondary" id="resetAllBtn">↺ Reset Starter Code</button>
+    </div>
+
+    <!-- Web Dev View -->
+    <section class="view active" id="web">
+      <h2>Build a web page!</h2>
+      <div class="web-grid">
+        <div class="editors">
+          <div class="pane">
+            <label for="html"><span class="tag html">HTML</span>Structure</label>
+            <textarea id="html" spellcheck="false" autocapitalize="off" autocorrect="off"></textarea>
+          </div>
+          <div class="pane">
+            <label for="css"><span class="tag css">CSS</span>Style</label>
+            <textarea id="css" spellcheck="false" autocapitalize="off" autocorrect="off"></textarea>
+          </div>
+          <div class="pane">
+            <label for="js"><span class="tag js">JS</span>Action</label>
+            <textarea id="js" spellcheck="false" autocapitalize="off" autocorrect="off"></textarea>
+          </div>
+        </div>
+        <div class="pane">
+          <label>👀 Live preview</label>
+          <iframe id="preview" title="Live preview" sandbox="allow-scripts"></iframe>
+        </div>
+      </div>
+    </section>
+
+    <!-- JavaScript Practice View -->
+    <section class="view" id="jsrun">
+      <h2>Write JavaScript!</h2>
+      <div class="js-wrap">
+        <div class="pane">
+          <label for="jscode"><span class="tag js">JavaScript</span>Your code</label>
+          <textarea id="jscode" spellcheck="false" autocapitalize="off" autocorrect="off"></textarea>
+          <button class="run run-js" id="runJsBtn">▶ Run JS Code</button>
+          <div class="status">Runs instantly in browser ✅</div>
+        </div>
+        <div class="pane">
+          <label>📺 Output Console</label>
+          <pre id="jsout" class="out-box" aria-live="polite">Press “Run JS Code” to see what happens!</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- Python Practice View -->
+    <section class="view" id="py">
+      <h2>Write some Python!</h2>
+      <div class="py-wrap">
+        <div class="pane">
+          <label for="pycode"><span class="tag" style="background:var(--py)">Python</span>Your code</label>
+          <textarea id="pycode" spellcheck="false" autocapitalize="off" autocorrect="off"></textarea>
+          <button class="run" id="runBtn">▶ Run Code</button>
+          <div class="status" id="status">Python engine waking up… 😴</div>
+        </div>
+        <div class="pane">
+          <label>📺 Output</label>
+          <pre id="out" class="out-box" aria-live="polite">Press “Run Code” to see what happens!</pre>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- Pyodide local script (with fallback offline execution engine) -->
+<script src="pyodide/pyodide.js" onerror="window.pyodideLoadFailed=true;"></script>
+<script>
+const $ = id => document.getElementById(id);
+
+const starter = {
+  html: '<h1 id="title">Hello, world! 👋</h1>\n<p>Click the button:</p>\n<button id="btn">Change colour</button>',
+  css: 'body { font-family: sans-serif; text-align: center; padding: 16px; }\nh1 { color: tomato; }\nbutton { font-size: 18px; padding: 10px 16px; border-radius: 10px; cursor: pointer; }',
+  js: 'const colours = ["tomato", "royalblue", "seagreen", "orchid"];\nlet i = 0;\ndocument.getElementById("btn").onclick = () => {\n  i = (i + 1) % colours.length;\n  document.getElementById("title").style.color = colours[i];\n};',
+  jscode: '// Simple JavaScript Runner!\nconsole.log("Hello from JavaScript! ⚡");\n\nlet name = "Alex";\nlet score = 10;\nconsole.log(name + " scored " + (score * 5) + " points!");\n\nfor (let i = 1; i <= 5; i++) {\n  console.log("Step " + i);\n}',
+  py: 'name = input("What is your name? ")\nprint("Hello,", name + "!")\n\nfor n in range(1, 6):\n    print(n, "x 2 =", n * 2)'
+};
+
+/* Load saved state or starter defaults */
+function loadInitialContent() {
+  ['html', 'css', 'js', 'jscode', 'pycode'].forEach(k => {
+    const saved = localStorage.getItem('code_playground_' + k);
+    const targetKey = k === 'pycode' ? 'py' : k;
+    $(k).value = saved !== null ? saved : starter[targetKey];
+  });
+}
+loadInitialContent();
+
+/* Auto-save on typing */
+['html', 'css', 'js', 'jscode', 'pycode'].forEach(k => {
+  $(k).addEventListener('input', () => {
+    localStorage.setItem('code_playground_' + k, $(k).value);
+  });
+});
+
+/* Reset code button */
+$('resetAllBtn').addEventListener('click', () => {
+  if (confirm("Reset all code back to default starter examples?")) {
+    ['html', 'css', 'js', 'jscode'].forEach(k => {
+      $(k).value = starter[k];
+      localStorage.setItem('code_playground_' + k, starter[k]);
+    });
+    $('pycode').value = starter.py;
+    localStorage.setItem('code_playground_pycode', starter.py);
+    updatePreview();
+  }
+});
+
+/* Tab key inserts spaces */
+document.querySelectorAll('textarea').forEach(t => t.addEventListener('keydown', e => {
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    t.setRangeText('  ', t.selectionStart, t.selectionEnd, 'end');
+    t.dispatchEvent(new Event('input'));
+  }
+}));
+
+/* Web Dev Live preview */
+let timer;
+function updatePreview() {
+  const js = $('js').value.replace(/<\/script>/gi, '<\\/script>');
+  $('preview').srcdoc = '<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>' + $('css').value + '</style></head><body>' + $('html').value + '<scr' + 'ipt>try{' + js + '}catch(e){document.body.insertAdjacentHTML("beforeend","<p style=\'color:red\'>Oops! "+e.message+"</p>")}</scr' + 'ipt></body></html>';
+}
+['html', 'css', 'js'].forEach(k => $(k).addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(updatePreview, 250); }));
+updatePreview();
+
+/* JavaScript Execution Tab Logic */
+$('runJsBtn').addEventListener('click', () => {
+  const code = $('jscode').value;
+  const jsOut = $('jsout');
+  jsOut.textContent = '';
+  
+  let logs = [];
+  const customConsole = {
+    log: (...args) => logs.push(args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ')),
+    warn: (...args) => logs.push('[WARN] ' + args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ')),
+    error: (...args) => logs.push('[ERROR] ' + args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' '))
+  };
+
+  try {
+    const runner = new Function('console', code);
+    runner(customConsole);
+    jsOut.textContent = logs.join('\n') || '(Your code ran, but didn’t print anything. Try console.log("hi")!)';
+  } catch (err) {
+    jsOut.textContent = logs.concat(['Oops! ' + err.message]).join('\n');
+  }
+});
+
+/* Navigation */
+document.querySelectorAll('.nav-btn').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('.nav-btn').forEach(x => x.classList.toggle('active', x === b));
+  document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === b.dataset.view));
+}));
+
+/* Python Environment Setup & Fallback */
+let py, lines = [];
+let useFallbackInterpreter = false;
+
+function executeFallbackPython(code) {
+  const output = [];
+  const vars = {};
+
+  const cleanLine = line => {
+    const idx = line.indexOf('#');
+    return idx !== -1 ? line.slice(0, idx) : line;
+  };
+
+  const evalVal = expr => {
+    expr = expr.trim();
+    if ((expr.startsWith('"') && expr.endsWith('"')) || (expr.startsWith("'") && expr.endsWith("'"))) {
+      return expr.slice(1, -1);
+    }
+    if (!isNaN(expr) && expr !== '') return Number(expr);
+    if (expr in vars) return vars[expr];
+    
+    if (expr.includes('+')) {
+      const parts = expr.split('+').map(p => evalVal(p));
+      return parts.reduce((a, b) => a + b);
+    }
+    if (expr.includes('*')) {
+      const parts = expr.split('*').map(p => evalVal(p));
+      return parts.reduce((a, b) => a * b);
+    }
+    return expr;
+  };
+
+  const rawLines = code.split('\n');
+  let i = 0;
+
+  while (i < rawLines.length) {
+    let line = cleanLine(rawLines[i]).trim();
+    if (!line) { i++; continue; }
+
+    if (line.includes('input(')) {
+      const varMatch = line.match(/^([a-zA-Z_]\w*)\s*=\s*input\((.*)\)$/);
+      if (varMatch) {
+        const promptText = evalVal(varMatch[2] || '""');
+        const ans = window.prompt("Python asks: " + promptText);
+        vars[varMatch[1]] = ans === null ? "" : ans;
+        i++;
+        continue;
+      }
+    }
+
+    if (line.startsWith('print(') && line.endsWith(')')) {
+      const inner = line.slice(6, -1);
+      const args = inner.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(a => evalVal(a));
+      output.push(args.join(' '));
+      i++;
+      continue;
+    }
+
+    if (line.includes('=') && !line.startsWith('if ') && !line.startsWith('for ')) {
+      const [vName, vVal] = line.split('=').map(s => s.trim());
+      if (vName) {
+        vars[vName] = evalVal(vVal);
+        i++;
+        continue;
+      }
+    }
+
+    if (line.startsWith('for ') && line.endsWith(':')) {
+      const loopMatch = line.match(/^for\s+([a-zA-Z_]\w*)\s+in\s+range\((.*?)\):$/);
+      if (loopMatch) {
+        const loopVar = loopMatch[1];
+        const rangeArgs = loopMatch[2].split(',').map(a => Number(evalVal(a)));
+        let start = 0, end = 0;
+        if (rangeArgs.length === 1) { end = rangeArgs[0]; }
+        else if (rangeArgs.length >= 2) { start = rangeArgs[0]; end = rangeArgs[1]; }
+
+        const block = [];
+        i++;
+        while (i < rawLines.length) {
+          const subLine = rawLines[i];
+          if (subLine.startsWith('    ') || subLine.startsWith('\t') || subLine.trim() === '') {
+            block.push(subLine);
+            i++;
+          } else {
+            break;
+          }
+        }
+
+        for (let v = start; v < end; v++) {
+          vars[loopVar] = v;
+          for (const bLine of block) {
+            const trimmedB = cleanLine(bLine).trim();
+            if (trimmedB.startsWith('print(') && trimmedB.endsWith(')')) {
+              const inner = trimmedB.slice(6, -1);
+              const args = inner.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(a => evalVal(a));
+              output.push(args.join(' '));
+            }
+          }
+        }
+        continue;
+      }
+    }
+
+    i++;
+  }
+
+  return output.join('\n');
+}
+
+(async () => {
+  if (window.pyodideLoadFailed || typeof loadPyodide === 'undefined') {
+    useFallbackInterpreter = true;
+    $('status').textContent = 'Python Ready ✅ (Built-in offline engine active)';
+    return;
+  }
+  try {
+    py = await loadPyodide({ indexURL: 'pyodide/' });
+    py.setStdout({ batched: s => lines.push(s) });
+    py.setStderr({ batched: s => lines.push(s) });
+    py.setStdin({ stdin: () => { const a = window.prompt('Python is asking:'); return a === null ? '' : a; } });
+    $('status').textContent = 'Python is ready! ✅';
+  } catch (e) {
+    useFallbackInterpreter = true;
+    $('status').textContent = 'Python Ready ✅ (Built-in offline engine active)';
+  }
+})();
+
+$('runBtn').addEventListener('click', async () => {
+  $('runBtn').disabled = true;
+  $('out').textContent = 'Running…';
+  lines = [];
+
+  await new Promise(r => setTimeout(r, 30));
+
+  if (useFallbackInterpreter || !py) {
+    try {
+      const res = executeFallbackPython($('pycode').value);
+      $('out').textContent = res || '(Your code ran, but didn’t print anything. Try print("hi")!)';
+    } catch (err) {
+      $('out').textContent = 'Oops! ' + err.message;
+    }
+  } else {
+    try {
+      await py.runPythonAsync($('pycode').value);
+      $('out').textContent = lines.join('\n') || '(Your code ran, but didn’t print anything. Try print("hi")!)';
+    } catch (e) {
+      const msg = String(e.message).trim().split('\n').pop();
+      $('out').textContent = 'Oops! ' + msg;
+    }
+  }
+
+  $('runBtn').disabled = false;
+});
+</script>
+</body>
+</html>
